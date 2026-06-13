@@ -25,29 +25,37 @@ use App\Http\Controllers\CV\ResumeSocialLinkController;
 // Admin
 use App\Http\Controllers\Admin\TemplateController as AdminTemplateController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+// ── Thêm dòng import này vào đầu web.php ────────────────────────────────
+use App\Http\Controllers\Admin\AdminDashboardController;
+
+// ── Thay thế block Route::prefix('admin') hiện tại bằng đoạn này ────────
+
+// --- ROUTE GIAO DIỆN ADMIN ---
+// Tạm bỏ middleware auth:sanctum để test giao diện.
+// Khi production: thêm lại ['auth:sanctum', 'role:admin']
+Route::prefix('admin')->group(function () {
+
+    // Dashboard – dùng Controller thay vì closure
+    // URL: http://127.0.0.1:8000/admin/dashboard
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+         ->name('admin.dashboard');
+
+    // API endpoint stats (Ajax refresh)
+    // URL: http://127.0.0.1:8000/admin/stats
+    Route::get('/stats', [AdminDashboardController::class, 'stats'])
+         ->name('admin.stats');
+
+    // Templates view – giữ nguyên closure hoặc chuyển sang controller
+    // URL: http://127.0.0.1:8000/admin/templates/view
+    Route::get('/templates/view', function () {
+        return view('admin.templates.index');
+    })->name('admin.templates.view');
+});
+
 
 // Tự động chuyển hướng từ trang gốc (/) sang Dashboard Admin
 Route::get('/', function () {
     return redirect('/admin/dashboard');
-});
-
-// --- ROUTE GIAO DIỆN ADMIN (Sử dụng view) ---
-// Tạm bỏ auth:sanctum để test giao diện hiển thị.
-Route::prefix('admin')->group(function () {
-    // URL: http://127.0.0.1:8000/admin/dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    });
-
-    // URL: http://127.0.0.1:8000/admin/templates/view
-    Route::get('/templates/view', function () {
-        return view('admin.templates.index');
-    });
 });
 
 // -----------------------------------------------------------------------
