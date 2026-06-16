@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-// --- Khai báo đúng Namespace theo cấu trúc thư mục của bạn ---
-
 // Auth
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -24,58 +22,47 @@ use App\Http\Controllers\CV\ResumeSocialLinkController;
 
 // Admin
 use App\Http\Controllers\Admin\TemplateController as AdminTemplateController;
-
-// ── Thêm dòng import này vào đầu web.php ────────────────────────────────
-use App\Http\Controllers\Admin\AdminDashboardController;
-
-// ── Thay thế block Route::prefix('admin') hiện tại bằng đoạn này ────────
-
-// --- ROUTE GIAO DIỆN ADMIN ---
-// Tạm bỏ middleware auth:sanctum để test giao diện.
-// Khi production: thêm lại ['auth:sanctum', 'role:admin']
-Route::prefix('admin')->group(function () {
-
-    // Dashboard – dùng Controller thay vì closure
-    // URL: http://127.0.0.1:8000/admin/dashboard
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-         ->name('admin.dashboard');
-
-    // API endpoint stats (Ajax refresh)
-    // URL: http://127.0.0.1:8000/admin/stats
-    Route::get('/stats', [AdminDashboardController::class, 'stats'])
-         ->name('admin.stats');
-
-    // Templates view – giữ nguyên closure hoặc chuyển sang controller
-    // URL: http://127.0.0.1:8000/admin/templates/view
-    Route::get('/templates/view', function () {
-        return view('admin.templates.index');
-    })->name('admin.templates.view');
-});
-
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ResumeController as AdminResumeController;
 
 // Tự động chuyển hướng từ trang gốc (/) sang Dashboard Admin
+// Route::get('/', function () {
+//     return redirect('/admin/dashboard');
+// });
+
 Route::get('/', function () {
-    return redirect('/admin/dashboard');
+    return view('client.home'); // Trỏ về file resources/views/home.blade.php của user
 });
 
 // -----------------------------------------------------------------------
-// PUBLIC ROUTES
+// PUBLIC ROUTES (Không yêu cầu đăng nhập)
 // -----------------------------------------------------------------------
+
 Route::post('/auth/register', [RegisterController::class, 'register']);
 Route::post('/auth/login',    [LoginController::class, 'login']);
 
+Route::get('/cv/public/{slug}', [ResumeController::class, 'showPublic']);
+Route::get('/system/public/{slug}/export/pdf', [ResumeExportController::class, 'downloadPublicPdf']);
+
+
+// -----------------------------------------------------------------------
+// PROTECTED USER ROUTES (Yêu cầu auth:sanctum)
+// -----------------------------------------------------------------------
+
 Route::middleware('auth:sanctum')->group(function () {
+    // Auth & Profile
     Route::post('/auth/logout',     [LoginController::class, 'logout']);
     Route::get('/profile',          [ProfileController::class, 'show']);
     Route::patch('/profile/name',   [ProfileController::class, 'updateName']);
     Route::post('/profile/avatar',  [ProfileController::class, 'updateAvatar']);
     Route::delete('/profile/avatar',[ProfileController::class, 'removeAvatar']);
+
+    // Export PDF
+    Route::get('/system/resumes/{id}/export/pdf', [ResumeExportController::class, 'downloadPdf']);
 });
 
-// Public (không cần auth)
-Route::get('/cv/public/{slug}', [ResumeController::class, 'showPublic']);
-
-// Protected
+// CV Management
 Route::middleware('auth:sanctum')->prefix('cv')->group(function () {
     Route::get('/resumes',                        [ResumeController::class, 'index']);
     Route::post('/resumes',                       [ResumeController::class, 'store']);
@@ -84,9 +71,8 @@ Route::middleware('auth:sanctum')->prefix('cv')->group(function () {
     Route::delete('/resumes/{id}',                [ResumeController::class, 'destroy']);
     Route::post('/resumes/{id}/duplicate',        [ResumeController::class, 'duplicate']);
     Route::patch('/resumes/{id}/visibility',      [ResumeController::class, 'toggleVisibility']);
-});
 
-Route::middleware('auth:sanctum')->prefix('cv')->group(function () {
+    // Sub-resources
     Route::apiResource('resumes.educations',   ResumeEducationController::class)->except(['show']);
     Route::apiResource('resumes.experiences',  ResumeExperienceController::class)->except(['show']);
     Route::apiResource('resumes.skills',       ResumeSkillController::class)->except(['show']);
@@ -95,26 +81,50 @@ Route::middleware('auth:sanctum')->prefix('cv')->group(function () {
     Route::apiResource('resumes.social-links', ResumeSocialLinkController::class)->except(['show']);
 });
 
-// Public (không cần auth)
-Route::get('/system/public/{slug}/export/pdf', [ResumeExportController::class, 'downloadPublicPdf']);
-
-// Protected
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/system/resumes/{id}/export/pdf', [ResumeExportController::class, 'downloadPdf']);
-});
-
-// User routes
+// System User Routes
 Route::middleware('auth:sanctum')->prefix('system')->group(function () {
     Route::get('/templates',     [SystemTemplateController::class, 'index']);
     Route::get('/templates/{id}',[SystemTemplateController::class, 'show']);
 });
 
-// Admin routes (API dữ liệu - Đang giữ nguyên middleware)
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/templates',                          [AdminTemplateController::class, 'index']);
-    Route::get('/templates/{id}',                     [AdminTemplateController::class, 'show']);
-    Route::post('/templates',                         [AdminTemplateController::class, 'store']);
-    Route::post('/templates/{id}',                    [AdminTemplateController::class, 'update']);
-    Route::delete('/templates/{id}',                  [AdminTemplateController::class, 'destroy']);
-    Route::patch('/templates/{id}/toggle-active',     [AdminTemplateController::class, 'toggleActive']);
+
+// -----------------------------------------------------------------------
+// ADMIN WEB ROUTES (prefix: admin)
+// -----------------------------------------------------------------------
+
+// Các route Admin không chứa middleware (Được khai báo trước để tránh ghi đè sai route logic)
+// Các route Admin không chứa middleware (Được khai báo trước để tránh ghi đè sai route logic)
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+         ->name('admin.dashboard');
+    Route::get('/stats', [DashboardController::class, 'stats'])
+         ->name('admin.stats');
+    Route::get('/templates/view', [AdminTemplateController::class, 'index'])
+         ->name('admin.templates.view');
+         
+    // THÊM DÒNG NÀY VÀO ĐÂY:
+    Route::get('/templates', function () {
+        return redirect()->route('admin.templates.index');
+    });
 });
+
+// web.php — thêm vào group admin middleware
+Route::prefix('admin')->group(function () {
+   
+
+    // Templates
+    Route::get('templates/view',           [AdminTemplateController::class, 'index'])->name('admin.templates.index');
+    Route::post('templates',               [AdminTemplateController::class, 'store'])->name('admin.templates.store');
+    Route::put('templates/{template}',     [AdminTemplateController::class, 'update'])->name('admin.templates.update');
+    Route::delete('templates/{template}',  [AdminTemplateController::class, 'destroy'])->name('admin.templates.destroy');
+    Route::post('templates/{template}/toggle', [AdminTemplateController::class, 'toggleActive'])->name('admin.templates.toggle');
+    Route::get('resumes', [AdminResumeController::class, 'index'])->name('admin.resumes.index');
+    Route::delete('resumes/{id}', [AdminResumeController::class, 'destroy'])->name('admin.resumes.destroy');
+
+    // Users
+    Route::get('users',                    [UserController::class, 'index'])->name('admin.users.index');
+    Route::post('users',                   [UserController::class, 'store'])->name('admin.users.store');
+    Route::put('users/{user}',             [UserController::class, 'update'])->name('admin.users.update');
+    Route::delete('users/{user}',          [UserController::class, 'destroy'])->name('admin.users.destroy');
+});
+

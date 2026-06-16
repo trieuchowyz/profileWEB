@@ -10,11 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class AdminDashboardController extends Controller
+class DashboardController extends Controller
 {
-    /**
-     * Hiển thị trang dashboard admin với các thống kê tổng quan.
-     */
+    
     public function index()
     {
         // ── Thống kê tổng quan ──────────────────────────────────────────────
