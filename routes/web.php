@@ -27,30 +27,43 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ResumeController as AdminResumeController;
 
 // Tự động chuyển hướng từ trang gốc (/) sang Dashboard Admin
-// Route::get('/', function () {
-//     return redirect('/admin/dashboard');
-// });
+ Route::get('/', function () {
+     return redirect('/admin/dashboard');
+ });
 
-Route::get('/', function () {
-    return view('client.home'); // Trỏ về file resources/views/home.blade.php của user
-});
+// Route::get('/', function () {
+//     return view('client.home'); // Trỏ về file resources/views/home.blade.php của user
+// });
 
 // -----------------------------------------------------------------------
 // PUBLIC ROUTES (Không yêu cầu đăng nhập)
 // -----------------------------------------------------------------------
+Route::get('/auth/register', function () {
+    return view('auth.register');
+})->name('auth.register');
+Route::post('/auth/register', [RegisterController::class, 'register'])->name('auth.register.submit');
 
-Route::post('/auth/register', [RegisterController::class, 'register']);
-Route::post('/auth/login',    [LoginController::class, 'login']);
+Route::get('/auth/login', function () {
+    return view('auth.login');
+})->name('auth.login');
+Route::post('/auth/login', [LoginController::class, 'login'])->name('auth.login.submit');
 
 Route::get('/cv/public/{slug}', [ResumeController::class, 'showPublic']);
 Route::get('/system/public/{slug}/export/pdf', [ResumeExportController::class, 'downloadPublicPdf']);
 
+// Các trang thông tin tĩnh
+Route::get('/chinh-sach-bao-mat', function () {
+    return view('client.privacy');
+})->name('client.privacy');
 
+Route::get('/dieu-khoan-su-dung', function () {
+    return view('client.terms');
+})->name('client.terms');
 // -----------------------------------------------------------------------
-// PROTECTED USER ROUTES (Yêu cầu auth:sanctum)
+// PROTECTED USER ROUTES (Yêu cầu )
 // -----------------------------------------------------------------------
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('')->group(function () {
     // Auth & Profile
     Route::post('/auth/logout',     [LoginController::class, 'logout']);
     Route::get('/profile',          [ProfileController::class, 'show']);
@@ -63,7 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // CV Management
-Route::middleware('auth:sanctum')->prefix('cv')->group(function () {
+Route::middleware('')->prefix('cv')->group(function () {
     Route::get('/resumes',                        [ResumeController::class, 'index']);
     Route::post('/resumes',                       [ResumeController::class, 'store']);
     Route::get('/resumes/{id}',                   [ResumeController::class, 'show']);
@@ -82,7 +95,7 @@ Route::middleware('auth:sanctum')->prefix('cv')->group(function () {
 });
 
 // System User Routes
-Route::middleware('auth:sanctum')->prefix('system')->group(function () {
+Route::middleware('')->prefix('system')->group(function () {
     Route::get('/templates',     [SystemTemplateController::class, 'index']);
     Route::get('/templates/{id}',[SystemTemplateController::class, 'show']);
 });
@@ -101,7 +114,7 @@ Route::prefix('admin')->group(function () {
          ->name('admin.stats');
     Route::get('/templates/view', [AdminTemplateController::class, 'index'])
          ->name('admin.templates.view');
-         
+
     // THÊM DÒNG NÀY VÀO ĐÂY:
     Route::get('/templates', function () {
         return redirect()->route('admin.templates.index');
@@ -110,7 +123,7 @@ Route::prefix('admin')->group(function () {
 
 // web.php — thêm vào group admin middleware
 Route::prefix('admin')->group(function () {
-   
+
 
     // Templates
     Route::get('templates/view',           [AdminTemplateController::class, 'index'])->name('admin.templates.index');

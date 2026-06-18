@@ -3,21 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    public function __construct(protected AuthService $authService) {}
-
-    /**
-     * Handle a login request.
-     *
-     * POST /api/auth/login
-     */
     public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -27,55 +19,37 @@ class LoginController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed.',
+                'message' => 'Vui lòng kiểm tra lại thông tin.',
                 'errors'  => $validator->errors(),
             ], 422);
         }
 
-        try {
-            $result = $this->authService->login(
-                $validator->validated(),
-                $request->userAgent() ?? 'web'
-            );
-        } catch (ValidationException $e) {
+        // Dùng Session mặc định của Laravel để đăng nhập
+        $credentials = $validator->validated();
+        $remember = $request->boolean('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            // Đăng nhập thành công, tạo session mới để bảo mật
+            $request->session()->regenerate();
+
             return response()->json([
-                'message' => 'Invalid credentials.',
-                'errors'  => $e->errors(),
-            ], 401);
+                'message' => 'Đăng nhập thành công.',
+                'user'    => Auth::user(),
+            ]);
         }
 
+        // Sai email hoặc mật khẩu
         return response()->json([
-            'message' => 'Login successful.',
-            'user'    => $result['user'],
-            'token'   => $result['token'],
-        ]);
+            'message' => 'Email hoặc mật khẩu không chính xác.',
+        ], 401);
     }
 
-    /**
-     * Log out the current device (revoke current token).
-     *
-     * POST /api/auth/logout
-     */
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request)
     {
-        $this->authService->logout($request->user());
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Logged out successfully.',
-        ]);
-    }
-
-    /**
-     * Log out from all devices (revoke all tokens).
-     *
-     * POST /api/auth/logout-all
-     */
-    public function logoutAll(Request $request): JsonResponse
-    {
-        $this->authService->logoutAll($request->user());
-
-        return response()->json([
-            'message' => 'Logged out from all devices.',
-        ]);
+        return redirect('/'); // Đăng xuất xong đá về trang chủ
     }
 }
