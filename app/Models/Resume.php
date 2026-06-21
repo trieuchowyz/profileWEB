@@ -19,13 +19,26 @@ class Resume extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'template_id', 'title', 'slug', 
-        'full_name', 'job_title', 'email', 'phone', 
-        'address', 'avatar', 'summary', 'custom_styles', 'is_public'
+        'user_id',
+        'template_id',
+        'title',
+        'slug',
+        'full_name',
+        'job_title',
+        'email',
+        'phone',
+        'address',
+        'avatar',
+        'summary',
+        'custom_styles',
+        'is_public',
+        'pdf_path',
+        'section_order'
     ];
 
     protected $casts = [
         'custom_styles' => 'array', // Convert JSON lưu style cá nhân hóa
+        'section_order' => 'array',
         'is_public' => 'boolean',
     ];
 
@@ -69,5 +82,4 @@ class Resume extends Model
     {
         return $this->hasMany(ResumeSocialLink::class);
     }
-
 }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('resume_id')->constrained()->cascadeOnDelete();
             $table->string('name'); // VD: Laravel, React, Photoshop
             $table->integer('level')->nullable(); // Mức độ thành thạo (ví dụ 1-100)
-            $table->integer('order')->default(0);
+            $table->integer('order_index')->default(0);
             $table->timestamps();
         });
     }

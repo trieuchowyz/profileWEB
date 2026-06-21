@@ -85,6 +85,7 @@ class ResumeController extends Controller
             'summary'        => ['nullable', 'string'],
             'custom_styles'  => ['nullable', 'array'],
             'is_public'      => ['nullable', 'boolean'],
+            'section_order'  => ['nullable', 'array'],
         ]);
 
         if ($validator->fails()) {
@@ -126,6 +127,8 @@ class ResumeController extends Controller
             'summary'       => ['sometimes', 'nullable', 'string'],
             'custom_styles' => ['sometimes', 'nullable', 'array'],
             'is_public'     => ['sometimes', 'boolean'],
+            'section_order' => ['sometimes', 'nullable', 'array'],
+            'pdf_path'      => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {

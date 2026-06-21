@@ -14,9 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'role' => CheckRole::class,
-        ]);
+    $middleware->alias([
+        'admin' => \App\Http\Middleware\CheckAdminRole::class,
+    ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
