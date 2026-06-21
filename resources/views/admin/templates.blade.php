@@ -91,7 +91,7 @@
                             data-bs-target="#modalEdit{{ $tpl->id }}">
                             ✏️ Sửa
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete({{ $tpl->id }})">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{{ $tpl->id }}')">
                             🗑 Xoá
                         </button>
                         <form id="delete-form-{{ $tpl->id }}"
@@ -227,7 +227,7 @@
 <script>
     function confirmDelete(id) {
         if (confirm('⚠️ Bạn chắc chắn muốn xoá template này? Các CV đang dùng template này có thể bị lỗi hiển thị!')) {
-            document.getElementById('delete-form-' + id).submit();
+            document.getElementById(`delete-form-${id}`).submit();
         }
     }
 

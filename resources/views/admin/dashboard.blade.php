@@ -250,7 +250,7 @@
                         <span class="template-count">{{ $template->resume_count }} CV</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width:{{ round(($template->resume_count / $maxCount) * 100) }}%"></div>
+                        <div class="progress-fill" style="width: {{ round(($template->resume_count / $maxCount) * 100) }}%"></div>
                     </div>
                 </div>
                 @endforeach

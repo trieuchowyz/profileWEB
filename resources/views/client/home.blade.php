@@ -20,10 +20,11 @@
       Xây dựng CV chuyên nghiệp trong vài phút với công nghệ AI, mẫu chuẩn ATS và công cụ kéo-thả trực quan.
     </p>
     <div class="hero-btns">
-      <button class="btn-primary" id="btnCreate">
+      <a href="{{ url('/') }}" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
         <i class="ti ti-plus" aria-hidden="true"></i>
         Tạo CV ngay
-      </button>
+      </a>
+      
       <button class="btn-outline" id="btnDemo">
         <i class="ti ti-player-play" aria-hidden="true"></i>
         Dùng thử Demo
@@ -331,7 +332,10 @@
      onerror="this.src='https://placehold.co/400x566/e2e8f0/475569?text=Hinh+CV'">
 
         <div class="template-overlay">
-          <button class="btn-use-template">Tạo CV</button>
+          <form action="{{ route('cv.start', $template->id) }}" method="POST" style="margin: 0; padding: 0;">
+            @csrf
+            <button type="submit" class="btn-use-template">Tạo CV</button>
+          </form>
         </div>
       </div>
 
@@ -356,10 +360,10 @@
     <h2 class="modal-title">Bắt đầu tạo CV của bạn</h2>
     <p class="modal-desc">Chọn phương thức khởi đầu phù hợp với bạn</p>
     <div class="modal-options">
-      <button class="modal-option">
+      <a href="{{ url('/test-builder') }}" class="modal-option" style="text-decoration: none;">
         <i class="ti ti-template" aria-hidden="true"></i>
         <span>Chọn mẫu có sẵn</span>
-      </button>
+      </a>
       <button class="modal-option">
         <i class="ti ti-wand" aria-hidden="true"></i>
         <span>Tạo bằng AI</span>

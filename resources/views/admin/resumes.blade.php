@@ -106,7 +106,7 @@
                                 👁️ Xem
                             </a>
                         @endif
-                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteResume({{ $resume->id }})">
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteResume('{{ $resume->id }}');" type="button">
                             🗑 Xoá
                         </button>
                         <form id="delete-resume-{{ $resume->id }}" action="{{ route('admin.resumes.destroy', $resume->id) }}" method="POST" class="d-none">

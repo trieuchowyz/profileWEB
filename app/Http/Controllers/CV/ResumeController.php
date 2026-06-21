@@ -110,6 +110,8 @@ class ResumeController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
+
+    
         try {
             $resume = $this->resumeService->getFullResume($id, $request->user());
         } catch (ModelNotFoundException) {
@@ -144,13 +146,10 @@ class ResumeController extends Controller
             'message' => 'Resume updated successfully.',
             'data'    => $updated,
         ]);
+        
     }
 
-    /**
-     * Xoá CV.
-     *
-     * DELETE /api/cv/resumes/{id}
-     */
+
     public function destroy(Request $request, int $id): JsonResponse
     {
         try {

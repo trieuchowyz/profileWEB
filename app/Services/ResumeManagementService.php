@@ -94,16 +94,18 @@ class ResumeManagementService
      * @param array  $data
      * @return Resume
      */
-    public function update(Resume $resume, array $data): Resume
+    public function update(Resume $resume, array $data)
     {
-        // Nếu title thay đổi thì tạo lại slug
-        if (isset($data['title']) && $data['title'] !== $resume->title) {
-            $data['slug'] = $this->generateUniqueSlug($data['title'], $resume->id);
+        // 1. Cập nhật mảng custom_styles (Gộp style cũ và mới nếu user chỉ gửi 1 màu)
+        if (isset($data['custom_styles'])) {
+            $currentStyles = is_array($resume->custom_styles) ? $resume->custom_styles : [];
+            $data['custom_styles'] = array_merge($currentStyles, $data['custom_styles']);
         }
 
+        // 2. Cập nhật thông tin thẳng vào model
         $resume->update($data);
 
-        return $resume->refresh();
+        return $resume->fresh(); // Trả về bản ghi mới nhất
     }
 
     /**
@@ -209,4 +211,5 @@ class ResumeManagementService
 
         return $slug;
     }
+    
 }

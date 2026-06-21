@@ -24,13 +24,13 @@ class DashboardController extends Controller
         // ── Tăng trưởng trong 30 ngày gần nhất ─────────────────────────────
         $thirtyDaysAgo = Carbon::now()->subDays(30);
 
-        $newUsersThisMonth    = User::where('created_at', '>=', $thirtyDaysAgo)->count();
-        $newResumesThisMonth  = Resume::where('created_at', '>=', $thirtyDaysAgo)->count();
+        $newUsersThisMonth    = User::where('created_at', '>=', $thirtyDaysAgo->toDateTimeString())->count();
+        $newResumesThisMonth  = Resume::where('created_at', '>=', $thirtyDaysAgo->toDateTimeString())->count();
 
         // Tính % so với 30 ngày trước đó
         $sixtyDaysAgo = Carbon::now()->subDays(60);
-        $newUsersPrevMonth   = User::whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])->count();
-        $newResumesPrevMonth = Resume::whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])->count();
+        $newUsersPrevMonth   = User::whereBetween('created_at', [$sixtyDaysAgo->toDateTimeString(), $thirtyDaysAgo->toDateTimeString()])->count();
+        $newResumesPrevMonth = Resume::whereBetween('created_at', [$sixtyDaysAgo->toDateTimeString(), $thirtyDaysAgo->toDateTimeString()])->count();
 
         $userGrowthPercent   = $newUsersPrevMonth > 0
             ? round((($newUsersThisMonth - $newUsersPrevMonth) / $newUsersPrevMonth) * 100, 1)
@@ -59,8 +59,9 @@ class DashboardController extends Controller
         });
 
         // ── Template phổ biến nhất (dựa vào số lần dùng) ───────────────────
-        $popularTemplates = Template::withCount('resume')
-            ->orderBy('resume_count', 'desc')
+        // Ensure relation name matches Model (usually 'resumes') and order by the generated count column
+        $popularTemplates = Template::withCount('resumes')
+            ->orderBy('resumes_count', 'desc')
             ->take(5)
             ->get();
 

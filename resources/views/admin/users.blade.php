@@ -87,7 +87,8 @@
                     <td class="text-muted small">{{ $user->created_at->format('d/m/Y') }}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-danger"
-                                onclick="confirmDeleteUser({{ $user->id }})">
+                            data-id="{{ $user->id }}"
+                            onclick="confirmDeleteUser(this.dataset.id)">
                             🗑 Xoá
                         </button>
                         <form id="delete-user-{{ $user->id }}"
